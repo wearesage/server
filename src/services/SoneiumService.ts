@@ -1,4 +1,4 @@
-import { SoneiumClient } from '@sage/soneium';
+import { SoneiumClient } from 'sage-soneium';
 import { createHash } from 'crypto';
 import { ethers } from 'ethers';
 import { config } from 'dotenv';

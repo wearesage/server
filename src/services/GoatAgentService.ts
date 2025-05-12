@@ -5,7 +5,7 @@ import { http } from "viem";
 import { viem } from "@goat-sdk/wallet-viem";
 import {zodToJsonSchema} from 'zod-to-json-schema'
 import { getTools } from '@goat-sdk/core';
-import { bravePlugin } from '../brave';
+import { bravePlugin } from 'brave-goat';
 
 export class GoatAgentService {
   private walletClient: any;

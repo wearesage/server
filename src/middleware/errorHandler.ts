@@ -16,14 +16,14 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ): void => {
-  const statusCode = err.statusCode || 500;
+  const statusCode = err.statusCode || (err as any).status || 500;
   
   console.error(`[Error] ${err.message}`);
   if (process.env.NODE_ENV !== 'production') {
     console.error(err.stack);
   }
   
-  res.status(statusCode).json({
+  res.status(statusCode).send({
     error: {
       message: err.message,
       ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })

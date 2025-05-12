@@ -89,6 +89,92 @@ export class Neo4jController {
       });
     }
   }
+/**
+   * Get graph data for visualization
+   */
+  async getGraphData(req: Request, res: Response): Promise<void> {
+    try {
+      // Cypher query to get nodes and relationships for visualization
+      const query = `
+        MATCH (n)-[r]->(m)
+        RETURN n, r, m
+        LIMIT 1000
+      `;
+      const result = await this.neo4jService.runQuery(query);
+
+      // D3 expects { nodes: [...], links: [...] }
+      const nodesMap: Record<string, any> = {};
+      const links: any[] = [];
+
+      // Helper to convert Neo4j integers to JS numbers (pure, non-mutating)
+      function convertIntegers(obj: any): any {
+        if (Array.isArray(obj)) {
+          return obj.map(convertIntegers);
+        } else if (obj && typeof obj === 'object') {
+          if (obj.low !== undefined && obj.high !== undefined && Object.keys(obj).length === 2) {
+            // Neo4j Integer
+            return obj.low;
+          }
+          const newObj: any = {};
+          for (const key of Object.keys(obj)) {
+            newObj[key] = convertIntegers(obj[key]);
+          }
+          return newObj;
+        }
+        return obj;
+      }
+
+      for (const record of result.records) {
+        // n, m are nodes; r is relationship
+        const n = record.n;
+        const m = record.m;
+        const r = record.r;
+
+        // Use Neo4j internal node IDs for D3 node IDs
+        const nInternalId = r && r.startNodeId ? r.startNodeId : (n && n.id);
+        const mInternalId = r && r.endNodeId ? r.endNodeId : (m && m.id);
+
+        // Add nodes by internal id (avoid duplicates)
+        if (n && nInternalId && !nodesMap[nInternalId]) {
+          nodesMap[nInternalId] = {
+            id: nInternalId,
+            dataId: n.id, // original property id
+            labels: n.labels,
+            ...convertIntegers({ properties: n.properties })
+          };
+        }
+        if (m && mInternalId && !nodesMap[mInternalId]) {
+          nodesMap[mInternalId] = {
+            id: mInternalId,
+            dataId: m.id, // original property id
+            labels: m.labels,
+            ...convertIntegers({ properties: m.properties })
+          };
+        }
+
+        // Add relationship as a link
+        if (r) {
+          links.push({
+            id: r.id,
+            type: r.type,
+            source: nInternalId,
+            target: mInternalId,
+            ...convertIntegers({ properties: r.properties })
+          });
+        }
+      }
+
+      const nodes = Object.values(nodesMap);
+
+      res.status(200).json({ nodes, edges: links });
+    } catch (error: any) {
+      console.error('Neo4j Controller - getGraphData error:', error);
+      res.status(500).json({
+        error: 'Failed to get graph data',
+        message: error.message,
+      });
+    }
+  }
 }
 
 export default Neo4jController;

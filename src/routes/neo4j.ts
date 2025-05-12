@@ -10,4 +10,7 @@ router.post('/query', (req, res) => neo4jController.executeQuery(req, res));
 // GET /api/neo4j/health - Check Neo4j database health
 router.get('/health', (req, res) => neo4jController.healthCheck(req, res));
 
+// GET /api/neo4j/graph - Get graph data for visualization
+router.get('/graph', (req, res) => neo4jController.getGraphData(req, res));
+
 export default router;

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { akashService } from '../services/akashService';
+import { akashService } from '../services/AkashService';
 import { ApiError } from '../middleware/errorHandler';
 
 /**

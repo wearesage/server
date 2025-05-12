@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { akashController } from '../controllers/akashController';
+import { akashController } from '../controllers/AkashController';
 
 const router = Router();
 

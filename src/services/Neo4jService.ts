@@ -19,7 +19,7 @@ export class Neo4jService {
     this.database = database;
     this.driver = neo4j.driver(
       this.uri,
-      neo4j.auth.basic(this.username, this.password, this.database)
+      neo4j.auth.basic(this.username, this.password)
     );
 
     console.log('\nNeo4jController initialized with:\n');

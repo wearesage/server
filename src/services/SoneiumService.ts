@@ -11,7 +11,7 @@ config();
  */
 export class SoneiumService {
   private static instance: SoneiumService;
-  private client: SoneiumClient;
+  private client: any;
   private contractAddress: string | null = null;
   private contractAbi: any[] = [
     "function registerSession(address user, bytes32 dataHash, uint256 duration) external",

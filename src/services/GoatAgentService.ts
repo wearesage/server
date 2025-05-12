@@ -10,7 +10,7 @@ import { bravePlugin } from 'brave-goat';
 export class GoatAgentService {
   private walletClient: any;
   private goatWallet: any;
-  private plugins: any[];
+  private plugins: any[] = [];
   private tools: any[] = [];
   private static instance: GoatAgentService;
 

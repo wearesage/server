@@ -24,16 +24,16 @@ router.get('/status', (req: Request, res: Response) => {
 });
 
 // Mount Ollama routes
-router.use('/ollama', ollamaRoutes);
+// router.use('/ollama', ollamaRoutes);
 
 // Mount Neo4j routes
-router.use('/neo4j', neo4jRoutes);
+// router.use('/neo4j', neo4jRoutes);
 
 // Mount Akash routes
-router.use('/akash', akashRoutes);
+// router.use('/akash', akashRoutes);
 
 // Mount Brave routes
-router.use('/brave', braveRoutes);
+// router.use('/brave', braveRoutes);
 
 // Mount GoatAgent routes
 router.use('/agent', agentRoutes);

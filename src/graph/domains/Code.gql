@@ -1,0 +1,1379 @@
+# Code domain GraphQL schema
+# This schema matches the TypeScript types in src/schema/code/nodes.ts and relationships.ts
+# Following conventions in existing Code.gql
+
+# Enums
+enum EntityKind {
+  CLASS
+  INTERFACE
+  FUNCTION
+  VARIABLE
+  ENUM
+  TYPE
+  NAMESPACE
+}
+
+enum TypeKind {
+  INTERFACE
+  CLASS
+  ENUM
+  PRIMITIVE
+  UNION
+  INTERSECTION
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  PROTECTED
+  PACKAGE
+}
+
+enum ImportKind {
+  NAMED
+  NAMESPACE
+  DEFAULT
+  SIDE_EFFECT
+}
+
+# Relationship properties
+type ImportRelationshipProperties @relationshipProperties {
+  imports: [String!]!
+  importCount: Int!
+  hasDefaultImport: Boolean!
+  hasNamedImports: Boolean!
+  hasNamespaceImport: Boolean!
+  isTypeOnly: Boolean!
+  importPath: String!
+  isRelative: Boolean!
+  isResolved: Boolean!
+  resolvedPath: String
+}
+
+type ExportRelationshipProperties @relationshipProperties {
+  exports: [String!]
+  exportCount: Int!
+  hasNamedExports: Boolean!
+  hasNamespaceExport: Boolean
+  isTypeOnly: Boolean!
+  isReExport: Boolean!
+}
+
+type CallsRelationshipProperties @relationshipProperties {
+  callCount: Int!
+  callLocationLines: [Int!]!
+  callLocationColumns: [Int!]!
+  arguments: [String!]
+  isAsync: Boolean!
+  isAwait: Boolean!
+  isChained: Boolean!
+  isConditional: Boolean!
+}
+
+type ContainsRelationshipProperties @relationshipProperties {
+  containerType: String!
+  containmentType: String!
+  isExported: Boolean!
+}
+
+type HasMethodRelationshipProperties @relationshipProperties {
+  methodType: String!
+  visibility: Visibility!
+  isGetter: Boolean!
+  isSetter: Boolean!
+  isOverride: Boolean!
+}
+
+type HasParameterRelationshipProperties @relationshipProperties {
+  index: Int!
+  isOptional: Boolean!
+  isRest: Boolean!
+  hasDefaultValue: Boolean!
+  isDestructured: Boolean!
+}
+
+type InterfaceHasPropertyRelationshipProperties @relationshipProperties {
+  index: Int!
+  isOptional: Boolean!
+}
+
+type ReferencesTypeRelationshipProperties @relationshipProperties {
+  referenceType: String!
+  isArray: Boolean!
+  isUnion: Boolean!
+  isIntersection: Boolean!
+  isGeneric: Boolean!
+  typeArguments: [String!]
+}
+
+type ReferencesVariableRelationshipProperties @relationshipProperties {
+  referenceType: String!
+  referenceCount: Int!
+  referenceLocationLines: [Int!]!
+  referenceLocationColumns: [Int!]!
+}
+
+type DependsOnRelationshipProperties @relationshipProperties {
+  dependencyType: String!
+  isStrong: Boolean!
+  isWeak: Boolean!
+  weight: Float!
+}
+
+type IsDecoratedByRelationshipProperties @relationshipProperties {
+  decoratorName: String!
+  decoratorArguments: [String!]
+  targetType: String!
+}
+
+type TestsRelationshipProperties @relationshipProperties {
+  testType: String!
+  framework: String!
+  assertionCount: Int
+}
+
+type RendersRelationshipProperties @relationshipProperties {
+  renderCount: Int!
+  renderLocationLines: [Int!]!
+  renderLocationColumns: [Int!]!
+  isConditional: Boolean!
+  props: JSON
+}
+
+type UsesHookRelationshipProperties @relationshipProperties {
+  hookName: String!
+  hookArguments: [String!]
+  isCustomHook: Boolean!
+}
+
+type ASTParentChildRelationshipProperties @relationshipProperties {
+  childIndex: Int!
+  nodeKind: Int!
+  isStatement: Boolean!
+  isExpression: Boolean!
+  isDeclaration: Boolean!
+}
+
+type ProvidesPropsRelationshipProperties @relationshipProperties {
+  props: [String!]!
+  bindings: JSON!
+}
+
+type ListensToRelationshipProperties @relationshipProperties {
+  events: [String!]!
+  handlers: JSON!
+}
+
+type UsesSlotRelationshipProperties @relationshipProperties {
+  name: String!
+  isScoped: Boolean!
+  hasDefaultContent: Boolean!
+}
+
+type ImportsSassRelationshipProperties @relationshipProperties {
+  path: String!
+  isPartial: Boolean!
+  namespace: String
+}
+
+type UsesVariableRelationshipProperties @relationshipProperties {
+  variable: String!
+  context: String!
+  isOverride: Boolean!
+}
+
+type IncludesMixinRelationshipProperties @relationshipProperties {
+  mixin: String!
+  parameters: JSON
+}
+
+type EntryPointOfRelationshipProperties @relationshipProperties {
+  entrypointType: String!
+  priority: Int!
+  source: String
+  isExplicit: Boolean
+}
+
+scalar JSON
+
+# Base interface for code elements
+interface CodeElement {
+  id: ID!
+  name: String!
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+# Nodes
+
+type Package implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  path: String!
+  absolutePath: String!
+  version: String
+  description: String
+  author: String
+  license: String
+  dependencies: JSON
+  devDependencies: JSON
+  peerDependencies: JSON
+  isLocal: Boolean
+  createdAt: DateTime
+  rootPath: String
+  repositoryUrl: String
+  language: String
+  isRootPackage: Boolean
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Directory implements CodeElement @node {
+  id: ID! @id
+  path: String!
+  absolutePath: String!
+  name: String!
+  parentPath: String
+  isRoot: Boolean
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type File implements CodeElement @node {
+  id: ID! @id
+  path: String!
+  absolutePath: String!
+  name: String!
+  extension: String!
+  language: String!
+  lineCount: Int!
+  size: Int!
+  hash: String
+  hasDefaultExport: Boolean!
+  defaultExportExpression: String
+  hasNamedExports: Boolean!
+  namedExports: [String!]
+  hasCommonJSExport: Boolean!
+  commonJSExportExpression: String
+  importCount: Int
+  exportCount: Int
+  isTest: Boolean
+  isTypeDefinition: Boolean
+  isModule: Boolean
+  isEntry: Boolean
+  parentDirectory: String
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Module implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  path: String!
+  isInternal: Boolean!
+  isThirdParty: Boolean!
+  sourceFile: String
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Namespace implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  isGlobal: Boolean!
+  isAmbient: Boolean!
+  description: String
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Class implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  isAbstract: Boolean!
+  isGeneric: Boolean!
+  hasConstructor: Boolean!
+  constructorParams: String
+  methodCount: Int
+  propertyCount: Int
+  staticMethodCount: Int
+  staticPropertyCount: Int
+  privateMethodCount: Int
+  privatePropertyCount: Int
+  protectedMethodCount: Int
+  protectedPropertyCount: Int
+  publicMethodCount: Int
+  publicPropertyCount: Int
+  implementsCount: Int
+  extendsClass: String
+  implementsInterfaces: [String!]
+  isExported: Boolean!
+  isDefaultExport: Boolean!
+  hasDecorators: Boolean!
+  description: String
+  documentation: String
+  sourceCode: String
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Interface implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  isGeneric: Boolean!
+  methodCount: Int
+  propertyCount: Int
+  extendsCount: Int
+  extendsInterfaces: [String!]
+  isExported: Boolean!
+  isDefaultExport: Boolean!
+  description: String
+  documentation: String
+  sourceCode: String
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type EnumMember implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  value: String
+  isComputed: Boolean!
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Enum implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  isConst: Boolean!
+  members: [EnumMember!]! @relationship(type: "HAS_MEMBER", direction: OUT)
+  isExported: Boolean!
+  isDefaultExport: Boolean!
+  description: String
+  documentation: String
+  sourceCode: String
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type TypeAlias implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  definition: String!
+  isGeneric: Boolean!
+  isUnion: Boolean!
+  isIntersection: Boolean!
+  isExported: Boolean!
+  isDefaultExport: Boolean!
+  referencedTypes: [String!]
+  description: String
+  documentation: String
+  sourceCode: String
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Function implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  parameterCount: Int!
+  isExported: Boolean!
+  isDefaultExport: Boolean!
+  isGenerator: Boolean!
+  isArrowFunction: Boolean!
+  isFunctionExpression: Boolean!
+  hasRestParameter: Boolean!
+  hasOptionalParameters: Boolean!
+  hasTypeParameters: Boolean!
+  callExpressions: [String!]
+  referencedVariables: [String!]
+  referencedFunctions: [String!]
+  referencedTypes: [String!]
+  isAsync: Boolean!
+  description: String
+  returnType: String
+  typeParameters: [String!]
+  decorators: [String!]
+  complexity: Int
+  loc: Int
+  documentation: String
+  sourceCode: String
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Method implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  isStatic: Boolean!
+  isAbstract: Boolean!
+  isGenerator: Boolean!
+  isGetter: Boolean!
+  isSetter: Boolean!
+  parameterCount: Int!
+  hasRestParameter: Boolean!
+  hasOptionalParameters: Boolean!
+  hasTypeParameters: Boolean!
+  callExpressions: [String!]
+  referencedVariables: [String!]
+  referencedFunctions: [String!]
+  referencedTypes: [String!]
+  overrides: Boolean
+  overridesMethod: String
+  isAsync: Boolean!
+  description: String
+  returnType: String
+  typeParameters: [String!]
+  decorators: [String!]
+  complexity: Int
+  loc: Int
+  documentation: String
+  sourceCode: String
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+  isExported: Boolean! 
+  isDefaultExport: Boolean! 
+}
+
+type Constructor implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  parameterCount: Int!
+  hasRestParameter: Boolean!
+  hasOptionalParameters: Boolean!
+  hasParameterProperties: Boolean!
+  callExpressions: [String!]
+  referencedVariables: [String!]
+  referencedFunctions: [String!]
+  referencedTypes: [String!]
+  isAsync: Boolean!
+  description: String
+  documentation: String
+  sourceCode: String
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+  isExported: Boolean!  
+  isDefaultExport: Boolean!  
+}
+
+type Property implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  isStatic: Boolean!
+  isReadonly: Boolean!
+  isOptional: Boolean!
+  typeString: String
+  initializer: String
+  isParameterProperty: Boolean!
+  hasDecorators: Boolean!
+  decorators: [String!]
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Variable implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  isConstant: Boolean!
+  scope: String!
+  typeString: String
+  initializer: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  isDestructured: Boolean
+  isArray: Boolean
+  isObject: Boolean
+  referencedVariables: [String!]
+  referencedFunctions: [String!]
+  referencedTypes: [String!]
+  documentation: String
+  sourceCode: String
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Parameter implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  index: Int!
+  isOptional: Boolean!
+  isRest: Boolean!
+  typeString: String
+  initializer: String
+  isParameterProperty: Boolean!
+  hasDecorators: Boolean!
+  decorators: [String!]
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type JsxAttribute implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  value: String
+  isSpread: Boolean!
+  isExpression: Boolean!
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type JsxElement implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  tagName: String!
+  isComponent: Boolean!
+  isSelfClosing: Boolean!
+  hasChildren: Boolean!
+  attributes: [JsxAttribute!]! @relationship(type: "HAS_ATTRIBUTE", direction: OUT)
+  parentElement: String
+  childElements: [String!]
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Test implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  type: String!
+  framework: String
+  testTarget: String
+  assertions: Int
+  isAsync: Boolean!
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Component implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  framework: String!
+  isFunction: Boolean!
+  isClass: Boolean!
+  hasProps: Boolean!
+  hasState: Boolean!
+  propsInterface: String
+  stateInterface: String
+  isExported: Boolean!
+  isDefaultExport: Boolean!
+  hasJsx: Boolean!
+  hasHooks: Boolean!
+  hooks: [String!]
+  description: String
+  documentation: String
+  sourceCode: String
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Dependency implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  version: String!
+  isDevDependency: Boolean!
+  isPeerDependency: Boolean!
+  isOptionalDependency: Boolean!
+  isDirectDependency: Boolean!
+  isTransitiveDependency: Boolean!
+  importCount: Int
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type TypeDefinition implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  source: String!
+  packageName: String
+  isExported: Boolean!
+  isDefaultExport: Boolean!
+  description: String
+  documentation: String
+  sourceCode: String
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type ASTNodeInfo implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  nodeType: String!
+  nodeKind: Int!
+  startPos: Int!
+  endPos: Int!
+  parentNode: String
+  childNodes: [String!]
+  flags: Int
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type InterfaceProperty implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  typeString: String!
+  description: String
+  isOptional: Boolean!
+  defaultValue: String
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type VueComponent implements CodeElement @node {
+  id: ID! @id
+  path: String!
+  absolutePath: String!
+  name: String!
+  hasTemplate: Boolean!
+  hasScript: Boolean!
+  hasScriptSetup: Boolean!
+  hasStyle: Boolean!
+  styleCount: Int!
+  isAsync: Boolean!
+  isExported: Boolean!
+  isDefaultExport: Boolean!
+  documentation: String
+  sourceCode: String
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type ComponentTemplate implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  content: String!
+  lang: String!
+  componentId: String!
+  hasSlots: Boolean!
+  slotCount: Int!
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type ComponentScript implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  lang: String!
+  componentId: String!
+  isSetup: Boolean!
+  hasDefineProps: Boolean!
+  hasDefineEmits: Boolean!
+  hasDefineExpose: Boolean!
+  hasDefineOptions: Boolean!
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type ComponentStyle implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  lang: String!
+  componentId: String!
+  isScoped: Boolean!
+  isModule: Boolean!
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Prop implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  componentId: String!
+  type: String!
+  isRequired: Boolean!
+  hasDefault: Boolean!
+  defaultValue: String
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Emit implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  componentId: String!
+  payloadType: String
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type ReactiveState implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  composableId: String
+  componentId: String
+  type: String!
+  reactivityType: String!
+  initialValue: String
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Composable implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  isAsync: Boolean!
+  description: String
+  returnTypes: [String!]
+  dependencies: [String!]
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type SassVariable implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  value: String!
+  file: String!
+  isPrivate: Boolean!
+  usageCount: Int
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type SassMixin implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  parameters: [String!]!
+  content: String!
+  file: String!
+  usageCount: Int
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type SassModule implements CodeElement @node {
+  id: ID! @id
+  file: String!
+  path: String!
+  absolutePath: String!
+  name: String!
+  isPartial: Boolean!
+  variableCount: Int!
+  mixinCount: Int!
+  functionCount: Int!
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+type Entrypoint implements CodeElement @node {
+  id: ID! @id
+  name: String!
+  type: String!
+  source: String!
+  isExplicit: Boolean!
+  packageJsonPath: String
+  scriptName: String
+  binName: String
+  priority: Int!
+  category: String!
+  functionId: String
+  filePath: String!
+  documentation: String
+  sourceCode: String
+  isExported: Boolean
+  isDefaultExport: Boolean
+  visibility: Visibility
+  file: String!
+  startLine: Int!
+  endLine: Int!
+  startColumn: Int
+  endColumn: Int
+  offset: Int
+  length: Int
+}
+
+# Relationships
+
+type Imports @relationshipProperties {
+  imports: [String!]!
+  importCount: Int!
+  hasDefaultImport: Boolean!
+  hasNamedImports: Boolean!
+  hasNamespaceImport: Boolean!
+  isTypeOnly: Boolean!
+  importPath: String!
+  isRelative: Boolean!
+  isResolved: Boolean!
+  resolvedPath: String
+}
+
+type ImportsFromPackage @relationshipProperties {
+  imports: [String!]!
+  importCount: Int!
+  hasDefaultImport: Boolean!
+  hasNamedImports: Boolean!
+  hasNamespaceImport: Boolean!
+  isTypeOnly: Boolean!
+  importPath: String!
+  isRelative: Boolean!
+  isResolved: Boolean!
+  resolvedPath: String
+  packageName: String!
+  packageVersion: String
+  isDevDependency: Boolean
+  isPeerDependency: Boolean
+}
+
+type ImportsTypes @relationshipProperties {
+  importCount: Int!
+  hasDefaultImport: Boolean!
+  hasNamedImports: Boolean!
+  hasNamespaceImport: Boolean!
+  isTypeOnly: Boolean!
+  importPath: String!
+  isRelative: Boolean!
+  isResolved: Boolean!
+  resolvedPath: String
+  typeNames: [String!]!
+}
+
+type ImportsTypesFromPackage @relationshipProperties {
+  importCount: Int!
+  hasDefaultImport: Boolean!
+  hasNamedImports: Boolean!
+  hasNamespaceImport: Boolean!
+  isTypeOnly: Boolean!
+  importPath: String!
+  isRelative: Boolean!
+  isResolved: Boolean!
+  resolvedPath: String
+  packageName: String!
+  packageVersion: String
+  typeNames: [String!]!
+}
+
+type ExportsLocal @relationshipProperties {
+  exports: [String!]!
+  exportCount: Int!
+  hasNamedExports: Boolean!
+  hasNamespaceExport: Boolean
+  isTypeOnly: Boolean!
+  isReExport: Boolean!
+  exportNames: [String!]!
+  exportKinds: [String!]!
+}
+
+type ExportsDefault @relationshipProperties {
+  export: String!
+  expression: String!
+  exportKind: String!
+}
+
+type Reexports @relationshipProperties {
+  exports: [String!]
+  exportCount: Int!
+  hasNamedExports: Boolean!
+  hasNamespaceExport: Boolean
+  isTypeOnly: Boolean!
+  isReExport: Boolean!
+  sourceFile: String!
+  exportNames: [String!]!
+}
+
+type ReexportsFromPackage @relationshipProperties {
+  exports: [String!]
+  exportCount: Int!
+  hasNamedExports: Boolean!
+  hasNamespaceExport: Boolean
+  isTypeOnly: Boolean!
+  isReExport: Boolean!
+  packageName: String!
+  packageVersion: String
+  exportNames: [String!]!
+}
+
+type ReexportsAll @relationshipProperties {
+  exports: [String!]
+  exportCount: Int!
+  hasNamedExports: Boolean!
+  hasNamespaceExport: Boolean
+  isTypeOnly: Boolean!
+  isReExport: Boolean!
+  sourceFile: String!
+}
+
+type Extends @relationshipProperties {
+  isDirectExtension: Boolean!
+  inheritanceLevel: Int
+  typeArguments: [String!]
+}
+
+type InterfaceExtends @relationshipProperties {
+  isDirectExtension: Boolean!
+  inheritanceLevel: Int
+  typeArguments: [String!]
+}
+
+type Implements @relationshipProperties {
+  isPartial: Boolean!
+  typeArguments: [String!]
+}
+
+type Calls @relationshipProperties {
+  callCount: Int!
+  callLocationLines: [Int!]!
+  callLocationColumns: [Int!]!
+  arguments: [String!]
+  isAsync: Boolean!
+  isAwait: Boolean!
+  isChained: Boolean!
+  isConditional: Boolean!
+}
+
+type Contains @relationshipProperties {
+  containerType: String!
+  containmentType: String!
+  isExported: Boolean!
+}
+
+type HasMethod @relationshipProperties {
+  methodType: String!
+  visibility: Visibility!
+  isGetter: Boolean!
+  isSetter: Boolean!
+  isOverride: Boolean!
+}
+
+type HasParameter @relationshipProperties {
+  index: Int!
+  isOptional: Boolean!
+  isRest: Boolean!
+  hasDefaultValue: Boolean!
+  isDestructured: Boolean!
+}
+
+type InterfaceHasProperty @relationshipProperties {
+  index: Int!
+  isOptional: Boolean!
+}
+
+type ReferencesType @relationshipProperties {
+  referenceType: String!
+  isArray: Boolean!
+  isUnion: Boolean!
+  isIntersection: Boolean!
+  isGeneric: Boolean!
+  typeArguments: [String!]
+}
+
+type ReferencesVariable @relationshipProperties {
+  referenceType: String!
+  referenceCount: Int!
+  referenceLocationLines: [Int!]!
+  referenceLocationColumns: [Int!]!
+}
+
+type DependsOn @relationshipProperties {
+  dependencyType: String!
+  isStrong: Boolean!
+  isWeak: Boolean!
+  weight: Float!
+}
+
+type IsDecoratedBy @relationshipProperties {
+  decoratorName: String!
+  decoratorArguments: [String!]
+  targetType: String!
+}
+
+type Tests @relationshipProperties {
+  testType: String!
+  framework: String!
+  assertionCount: Int
+}
+
+type Renders @relationshipProperties {
+  renderCount: Int!
+  renderLocationLines: [Int!]!
+  renderLocationColumns: [Int!]!
+  isConditional: Boolean!
+  props: JSON
+}
+
+type UsesHook @relationshipProperties {
+  hookName: String!
+  hookArguments: [String!]
+  isCustomHook: Boolean!
+}
+
+type ASTParentChild @relationshipProperties {
+  childIndex: Int!
+  nodeKind: Int!
+  isStatement: Boolean!
+  isExpression: Boolean!
+  isDeclaration: Boolean!
+}
+
+type ProvidesProps @relationshipProperties {
+  props: [String!]!
+  bindings: JSON!
+}
+
+type ListensTo @relationshipProperties {
+  events: [String!]!
+  handlers: JSON!
+}
+
+type UsesSlot @relationshipProperties {
+  name: String!
+  isScoped: Boolean!
+  hasDefaultContent: Boolean!
+}
+
+type DefinesVueComponent @relationshipProperties {
+  _placeholder: Boolean!
+}
+
+type UsesComposable @relationshipProperties {
+  _placeholder: Boolean!
+}
+
+type ImportsAuto @relationshipProperties {
+  symbol: String!
+  source: String!
+  isGlobal: Boolean!
+  pluginName: String!
+}
+
+type RegistersAuto @relationshipProperties {
+  componentName: String!
+  source: String!
+  pluginName: String!
+}
+
+type ImportsSass @relationshipProperties {
+  path: String!
+  isPartial: Boolean!
+  namespace: String
+}
+
+type UsesVariable @relationshipProperties {
+  variable: String!
+  context: String!
+  isOverride: Boolean!
+}
+
+type IncludesMixin @relationshipProperties {
+  mixin: String!
+  parameters: JSON
+}
+
+type EntryPointOf @relationshipProperties {
+  entrypointType: String!
+  priority: Int!
+  source: String
+  isExplicit: Boolean
+}

@@ -4,13 +4,8 @@ import { verifyToolAuthorization } from '../middleware/toolVerificationMiddlewar
 
 const router = Router();
 
-// Execute tool route with on-chain verification middleware
 router.post('/execute-tool', verifyToolAuthorization, goatAgentController.executeTool);
-
-// Get tools metadata route
 router.get('/tools-metadata', goatAgentController.getToolsMetadata);
-
-// Get chain info route
 router.get('/chain-info', goatAgentController.getChainInfo);
 
 export default router;

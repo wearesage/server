@@ -24,10 +24,12 @@
     "@goat-sdk/plugin-kim": "^0.1.13",
     "@goat-sdk/plugin-uniswap": "^0.2.15",
     "@goat-sdk/wallet-viem": "^0.2.12",
+    "@neo4j/graphql": "^7.1.1",
     "@reown/appkit-siwe": "^1.7.4",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.3",
+    "apollo-server": "^3.13.0",
     "axios": "^1.9.0",
     "brave-goat": "^1.0.0",
     "cors": "^2.8.5",
@@ -38,6 +40,8 @@
     "nodemon": "^3.1.10",
     "reflect-metadata": "^0.2.2",
     "sage-soneium": "^1.1.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "viem": "2.23.4",
@@ -45,6 +49,10 @@
     "zod-to-json-schema": "^3.24.5"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.18"
+    "@graphql-codegen/cli": "^5.0.6",
+    "@graphql-codegen/typescript": "^4.1.6",
+    "@types/cors": "^2.8.18",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8"
   }
 }

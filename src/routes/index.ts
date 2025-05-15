@@ -1,16 +1,17 @@
-import { Router, Request, Response } from 'express';
+import express, { Router, type Request, type Response } from 'express';
 import agentRoutes from './agent';
 import authRoutes from './auth';
+import neo4jRoutes from './neo4j';
 import sessionRoutes from './session';
 
 const router = Router();
 
-// GET /api
+const app = express()
+
 router.get('/', (req: Request, res: Response) => {
   res.json({ message: 'API is working' });
 });
 
-// GET /api/status
 router.get('/status', (req: Request, res: Response) => {
   res.json({
     status: 'online',
@@ -19,13 +20,9 @@ router.get('/status', (req: Request, res: Response) => {
   });
 });
 
-// Mount GoatAgent routes
+router.use('/neo4j', neo4jRoutes);
 router.use('/agent', agentRoutes);
-
-// Mount authorization routes
 router.use('/auth', authRoutes);
-
-// Mount session routes
 router.use('/session', sessionRoutes);
 
 export default router;

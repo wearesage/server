@@ -58,8 +58,6 @@ export class GoatAgentService {
       tool.params = (zodToJsonSchema as any)(tool.parameters).properties
       tool.required = (zodToJsonSchema as any)(tool.parameters).required
     })
-
-    console.log(this.tools)
   }
 
   async executeTool(toolName: string, params: any) {

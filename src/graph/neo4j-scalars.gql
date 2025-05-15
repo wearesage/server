@@ -1,0 +1,3 @@
+scalar DateTime
+scalar Point
+scalar Duration

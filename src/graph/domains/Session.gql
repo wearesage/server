@@ -1,0 +1,81 @@
+enum MessageType {
+  USER
+  ASSISTANT
+  SYSTEM
+  TOOL_CALL
+  TOOL_RESPONSE
+}
+
+type Session @node {
+  id: ID! @id
+  title: String
+  description: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  participants: [User!]! @relationship(type: "PARTICIPATES_IN", direction: IN)
+  messages: [Message!]! @relationship(type: "CONTAINS", direction: OUT)
+  systemPrompt: [SystemPrompt!]! @relationship(type: "USES_PROMPT", direction: OUT)
+  status: String # e.g., "active", "completed", "archived"
+  sessionType: String # e.g., "chat", "exploration", "analysis"
+  relatedCode: [CodeElement!]! @relationship(type: "ABOUT", direction: OUT)
+}
+
+type Message @node {
+  id: ID! @id
+  content: String!
+  createdAt: DateTime
+  messageType: MessageType!
+  sender: [User!]! @relationship(type: "SENT", direction: IN)
+  session: [Session!]! @relationship(type: "CONTAINS", direction: IN)
+  # For tool calls and responses
+  toolCalls: [ToolCall!]! @relationship(type: "INCLUDES_TOOL_CALL", direction: OUT)
+  isResponseTo: [Message!]! @relationship(type: "RESPONDS_TO", direction: OUT)
+  hasResponses: [Message!]! @relationship(type: "RESPONDS_TO", direction: IN)
+  # References and cognitive elements
+  referencesCode: [CodeElement!]! @relationship(type: "REFERENCES", direction: OUT)
+  containsQuestion: [Question!]! @relationship(type: "CONTAINS_QUESTION", direction: OUT)
+  containsHypothesis: [Hypothesis!]! @relationship(type: "CONTAINS_HYPOTHESIS", direction: OUT)
+}
+
+type SystemPrompt @node {
+  id: ID! @id
+  content: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+  name: String
+  description: String
+  creator: [User!]! @relationship(type: "CREATED", direction: IN)
+  usedInSessions: [Session!]! @relationship(type: "USES_PROMPT", direction: IN)
+  version: String
+}
+
+type Tool @node {
+  id: ID! @id
+  name: String!
+  description: String
+  schema: String # JSON schema for the tool
+  createdAt: DateTime
+  updatedAt: DateTime
+  creator: [User!]! @relationship(type: "CREATED", direction: IN)
+  calls: [ToolCall!]! @relationship(type: "CALLS_TOOL", direction: IN)
+}
+
+type ToolCall @node {
+  id: ID! @id
+  tool: [Tool!]! @relationship(type: "CALLS_TOOL", direction: OUT)
+  parameters: String # JSON string with parameters
+  result: String # JSON string with result
+  status: String # e.g., "pending", "success", "error"
+  createdAt: DateTime
+  completedAt: DateTime
+  message: [Message!]! @relationship(type: "INCLUDES_TOOL_CALL", direction: IN)
+  error: String
+}
+
+# Add relationship to User type
+extend type User {
+  sessions: [Session!]! @relationship(type: "PARTICIPATES_IN", direction: OUT)
+  messages: [Message!]! @relationship(type: "SENT", direction: OUT)
+  createdSystemPrompts: [SystemPrompt!]! @relationship(type: "CREATED", direction: OUT)
+  createdTools: [Tool!]! @relationship(type: "CREATED", direction: OUT)
+}

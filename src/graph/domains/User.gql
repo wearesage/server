@@ -1,0 +1,16 @@
+# User.gql
+# This schema defines user-related types and relationships
+
+enum UserType {
+  HUMAN
+  AI
+}
+
+type User @node {
+  id: ID! @id
+  name: String!
+  type: UserType!
+  email: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}

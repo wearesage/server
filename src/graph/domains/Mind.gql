@@ -1,0 +1,198 @@
+# Mind domain GraphQL schema
+# Matches TypeScript interfaces in src/schema/mind/nodes.ts
+
+# Enums
+enum HypothesisStatus {
+  UNVERIFIED
+  CONFIRMED
+  REFUTED
+}
+
+enum CreatedBy {
+  HUMAN
+  AI
+  SYSTEM
+}
+
+enum ReflectionPerspective {
+  PERFORMANCE
+  SECURITY
+  MAINTAINABILITY
+  ARCHITECTURE
+  OTHER
+}
+
+enum InsightImpact {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum QuestionStatus {
+  OPEN
+  ANSWERED
+}
+
+enum QuestionComplexity {
+  SIMPLE
+  COMPLEX
+}
+
+enum DecisionStatus {
+  PROPOSED
+  IMPLEMENTED
+  REVERTED
+}
+
+enum PatternIntentionality {
+  DELIBERATE
+  ACCIDENTAL
+}
+
+enum PatternQuality {
+  ANTI_PATTERN
+  BEST_PRACTICE
+  NEUTRAL
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  DEFERRED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TaskEffort {
+  TRIVIAL
+  MINOR
+  MAJOR
+  SIGNIFICANT
+}
+
+enum SubtaskStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
+}
+
+# Nodes
+type Hypothesis @node {
+  id: ID! @id
+  title: String!
+  description: String!
+  confidence: Float!
+  status: HypothesisStatus!
+  createdBy: CreatedBy!
+  evidence: [String!]
+  tags: [String!]
+}
+
+type Reflection @node {
+  id: ID! @id
+  title: String!
+  content: String!
+  depth: Int!
+  perspective: ReflectionPerspective!
+  createdBy: CreatedBy!
+  tags: [String!]
+}
+
+type Insight @node {
+  id: ID! @id
+  title: String!
+  content: String!
+  novelty: Float!
+  actionability: Float!
+  impact: InsightImpact!
+  createdBy: CreatedBy!
+  tags: [String!]
+}
+
+type Question @node {
+  id: ID! @id
+  text: String!
+  status: QuestionStatus!
+  complexity: QuestionComplexity!
+  createdBy: CreatedBy!
+  answer: String
+  tags: [String!]
+}
+
+type Decision @node {
+  id: ID! @id
+  title: String!
+  description: String!
+  status: DecisionStatus!
+  rationale: String!
+  createdBy: CreatedBy!
+  alternatives: [String!]
+  tags: [String!]
+}
+
+type Pattern @node {
+  id: ID! @id
+  name: String!
+  description: String!
+  frequency: Int!
+  intentionality: PatternIntentionality!
+  quality: PatternQuality!
+  createdBy: CreatedBy!
+  examples: [String!]
+  tags: [String!]
+}
+
+type Task @node {
+  id: ID! @id
+  title: String!
+  description: String!
+  status: TaskStatus!
+  priority: TaskPriority!
+  effort: TaskEffort!
+  assignedTo: String
+  dueDate: DateTime
+  createdBy: CreatedBy!
+  completedAt: DateTime
+  tags: [String!]
+}
+
+type Subtask @node {
+  id: ID! @id
+  title: String!
+  description: String
+  status: SubtaskStatus
+  createdAt: DateTime!
+  createdBy: String
+}
+
+type Verification @node {
+  id: ID! @id
+  title: String!
+  description: String
+  method: String!
+  createdAt: DateTime!
+}
+
+type Result @node {
+  id: ID! @id
+  title: String!
+  description: String
+  content: String
+  createdBy: String
+}
+
+type Orientation @node {
+  id: ID! @id
+  title: String!
+  content: String!
+  createdAt: DateTime!
+  createdBy: String
+}

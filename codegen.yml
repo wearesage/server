@@ -1,0 +1,7 @@
+schema: 
+  - "./src/graph/domains/*.gql"
+  - "./src/graph/neo4j-scalars.gql"
+generates:
+  ./src/graph/generated.ts:
+    plugins:
+      - "@neo4j/graphql-codegen"

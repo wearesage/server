@@ -2,10 +2,7 @@ import { Neo4jGraphQL } from "@neo4j/graphql";
 import neo4j from "neo4j-driver";
 import { ApolloServer } from "apollo-server";
 import fs from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { join } from "node:path";
 
 const domains = ["Code", "User", "Mind", "Session"].map((v) =>
   fs.readFileSync(join(__dirname, `./domains/${v}.gql`)).toString()

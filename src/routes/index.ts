@@ -1,28 +1,34 @@
-import express, { Router, type Request, type Response } from 'express';
-import agentRoutes from './agent';
-import authRoutes from './auth';
-import neo4jRoutes from './neo4j';
-import sessionRoutes from './session';
-
+import express, { Router, type Request, type Response } from "express";
+import agentRoutes from "./agent";
+import authRoutes from "./auth";
+import neo4jRoutes from "./neo4j";
+import sessionRoutes from "./session";
+import cors from "cors";
 const router = Router();
 
-const app = express()
+const app = express();
 
-router.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'API is working' });
+app.use(
+  cors({
+    origin: "*",
+  })
+);
+
+router.get("/", (req: Request, res: Response) => {
+  res.json({ message: "API is working" });
 });
 
-router.get('/status', (req: Request, res: Response) => {
+router.get("/status", (req: Request, res: Response) => {
   res.json({
-    status: 'online',
+    status: "online",
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    version: "1.0.0",
   });
 });
 
-router.use('/neo4j', neo4jRoutes);
-router.use('/agent', agentRoutes);
-router.use('/auth', authRoutes);
-router.use('/session', sessionRoutes);
+router.use("/neo4j", neo4jRoutes);
+router.use("/agent", agentRoutes);
+router.use("/auth", authRoutes);
+router.use("/session", sessionRoutes);
 
 export default router;

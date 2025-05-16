@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import apiRoutes from "./routes";
 import cors from "cors";
 import { GoatAgentService } from "./services/GoatAgentService";
-import graph from "./graph";
+// import graph from "./graph";
 
 dotenv.config();
 
@@ -28,11 +28,11 @@ app.get("/health", (req: Request, res: Response) => {
 });
 
 (async () => {
-  const { schema } = await graph.init();
+  // const { schema } = await graph.init();
 
-  app.get('/api/graph/schema', (req, res) => {
-    res.send(schema)
-  })
+  // app.get('/api/graph/schema', (req, res) => {
+  //   res.send(schema)
+  // })
 
   app.listen(port, async () => {
     console.log(`⚡️[server]: Server is running at http://localhost:${port}`);

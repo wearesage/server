@@ -73,8 +73,8 @@ const corsOptions = {
 // Apply CORS middleware with our custom options
 app.use(cors(corsOptions));
 
-// Fallback CORS handler for preflight requests
-app.options('*', cors(corsOptions));
+// Enable CORS pre-flight across the board
+app.options('*', cors());
 
 app.use(express.json());
 

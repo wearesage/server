@@ -11,26 +11,6 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
-// Middleware to redirect non-www to www
-app.use((req: Request, res: Response, next) => {
-  const host = req.hostname;
-  
-  // Skip for localhost and IP addresses
-  if (host === 'localhost' || /^(\d{1,3}\.){3}\d{1,3}$/.test(host)) {
-    return next();
-  }
-  
-  // If hostname doesn't start with www., redirect to www version
-  if (!host.startsWith('www.')) {
-    const protocol = req.protocol;
-    const wwwHost = `www.${host}`;
-    const fullUrl = `${protocol}://${wwwHost}${req.originalUrl}`;
-    return res.redirect(301, fullUrl);
-  }
-  
-  next();
-});
-
 app.use(cors({ origin: "*" }));
 
 app.use(express.json());

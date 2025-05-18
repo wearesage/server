@@ -11,12 +11,7 @@ const app: Express = express();
 const port = process.env.PORT || 3000;
 
 const corsOptions = {
-  origin: [
-    'https://seethemusic.xyz',
-    'https://www.seethemusic.xyz',
-    'http://seethemusic.xyz',
-    'http://www.seethemusic.xyz'
-  ],
+  origin: 'https://www.seethemusic.xyz',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };

@@ -1,18 +1,10 @@
-import express, { Router, type Request, type Response } from "express";
+import { Router, type Request, type Response } from "express";
 import agentRoutes from "./agent";
 import authRoutes from "./auth";
 import neo4jRoutes from "./neo4j";
 import sessionRoutes from "./session";
-import cors from "cors";
 const router = Router();
 
-const app = express();
-
-app.use(
-  cors({
-    origin: "*",
-  })
-);
 
 router.get("/", (req: Request, res: Response) => {
   res.json({ message: "API is working" });

@@ -13,50 +13,50 @@ const port = process.env.PORT || 3000;
 // Trust proxy headers (important for Heroku and other PaaS platforms)
 app.set('trust proxy', true);
 
-// Middleware to redirect all traffic to https without www
-app.use((req: Request, res: Response, next) => {
-  // Get host from headers
-  const hostHeader = req.headers.host || '';
-  const host = hostHeader.split(':')[0]; // Remove port if present
+// // Middleware to redirect all traffic to https without www
+// app.use((req: Request, res: Response, next) => {
+//   // Get host from headers
+//   const hostHeader = req.headers.host || '';
+//   const host = hostHeader.split(':')[0]; // Remove port if present
   
-  // Debug information
-  console.log('Redirection middleware:');
-  console.log('- Original URL:', req.originalUrl);
-  console.log('- Host header:', hostHeader);
-  console.log('- Protocol:', req.protocol);
-  console.log('- X-Forwarded-Proto:', req.headers['x-forwarded-proto']);
-  console.log('- Secure:', req.secure);
+//   // Debug information
+//   console.log('Redirection middleware:');
+//   console.log('- Original URL:', req.originalUrl);
+//   console.log('- Host header:', hostHeader);
+//   console.log('- Protocol:', req.protocol);
+//   console.log('- X-Forwarded-Proto:', req.headers['x-forwarded-proto']);
+//   console.log('- Secure:', req.secure);
   
-  // Skip for localhost, IP addresses, and Heroku app domains
-  if (
-    host === 'localhost' ||
-    /^(\d{1,3}\.){3}\d{1,3}$/.test(host) ||
-    host.endsWith('.herokuapp.com') // Skip for Heroku domains as they handle HTTPS already
-  ) {
-    console.log('- Skipping redirect for:', host);
-    return next();
-  }
+//   // Skip for localhost, IP addresses, and Heroku app domains
+//   if (
+//     host === 'localhost' ||
+//     /^(\d{1,3}\.){3}\d{1,3}$/.test(host) ||
+//     host.endsWith('.herokuapp.com') // Skip for Heroku domains as they handle HTTPS already
+//   ) {
+//     console.log('- Skipping redirect for:', host);
+//     return next();
+//   }
   
-  // Determine if we need to redirect
-  const isSecure = req.secure || req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https';
-  const hasWww = host.startsWith('www.');
+//   // Determine if we need to redirect
+//   const isSecure = req.secure || req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https';
+//   const hasWww = host.startsWith('www.');
   
-  if (!isSecure || hasWww) {
-    // Remove www if present
-    const cleanHost = hasWww ? host.substring(4) : host;
+//   if (!isSecure || hasWww) {
+//     // Remove www if present
+//     const cleanHost = hasWww ? host.substring(4) : host;
     
-    // Build the redirect URL (always https, no www)
-    const redirectUrl = `https://${cleanHost}${req.originalUrl}`;
+//     // Build the redirect URL (always https, no www)
+//     const redirectUrl = `https://${cleanHost}${req.originalUrl}`;
     
-    console.log('- Redirecting to:', redirectUrl);
+//     console.log('- Redirecting to:', redirectUrl);
     
-    // 301 is permanent redirect (good for SEO)
-    return res.redirect(301, redirectUrl);
-  }
+//     // 301 is permanent redirect (good for SEO)
+//     return res.redirect(301, redirectUrl);
+//   }
   
-  console.log('- No redirect needed');
-  next();
-});
+//   console.log('- No redirect needed');
+//   next();
+// });
 
 // Configure CORS with specific origins and options
 const corsOptions = {

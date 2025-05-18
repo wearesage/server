@@ -10,19 +10,35 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
+// Trust proxy headers (important for Heroku and other PaaS platforms)
+app.set('trust proxy', true);
+
 // Middleware to redirect all traffic to https without www
 app.use((req: Request, res: Response, next) => {
-  // Get host from headers which is more reliable than req.hostname
+  // Get host from headers
   const hostHeader = req.headers.host || '';
   const host = hostHeader.split(':')[0]; // Remove port if present
   
-  // Skip for localhost and IP addresses
-  if (host === 'localhost' || /^(\d{1,3}\.){3}\d{1,3}$/.test(host)) {
+  // Debug information
+  console.log('Redirection middleware:');
+  console.log('- Original URL:', req.originalUrl);
+  console.log('- Host header:', hostHeader);
+  console.log('- Protocol:', req.protocol);
+  console.log('- X-Forwarded-Proto:', req.headers['x-forwarded-proto']);
+  console.log('- Secure:', req.secure);
+  
+  // Skip for localhost, IP addresses, and Heroku app domains
+  if (
+    host === 'localhost' ||
+    /^(\d{1,3}\.){3}\d{1,3}$/.test(host) ||
+    host.endsWith('.herokuapp.com') // Skip for Heroku domains as they handle HTTPS already
+  ) {
+    console.log('- Skipping redirect for:', host);
     return next();
   }
   
   // Determine if we need to redirect
-  const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+  const isSecure = req.secure || req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https';
   const hasWww = host.startsWith('www.');
   
   if (!isSecure || hasWww) {
@@ -32,14 +48,35 @@ app.use((req: Request, res: Response, next) => {
     // Build the redirect URL (always https, no www)
     const redirectUrl = `https://${cleanHost}${req.originalUrl}`;
     
+    console.log('- Redirecting to:', redirectUrl);
+    
     // 301 is permanent redirect (good for SEO)
     return res.redirect(301, redirectUrl);
   }
   
+  console.log('- No redirect needed');
   next();
 });
 
-app.use(cors({ origin: "*" }));
+// Configure CORS with specific origins and options
+const corsOptions = {
+  origin: [
+    'https://seethemusic.xyz',
+    'https://www.seethemusic.xyz',
+    'http://seethemusic.xyz',
+    'http://www.seethemusic.xyz'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
+};
+
+// Apply CORS middleware with our custom options
+app.use(cors(corsOptions));
+
+// Fallback CORS handler for preflight requests
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
